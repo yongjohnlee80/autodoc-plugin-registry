@@ -1,0 +1,6 @@
+kind = "kb-type"
+name = "para.kb"
+title = "PARA"
+description = "Tiago Forte's PARA: Projects, Areas, Resources and Archives, filed by how actionable they are."
+repo = "https://github.com/yongjohnlee80/para.kb"
+author = "yongjohnlee80"

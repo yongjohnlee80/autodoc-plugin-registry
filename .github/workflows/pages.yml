@@ -1,0 +1,40 @@
+name: pages
+
+# On every push to main: build the site (index.json, the pages, the audit reports) and publish it
+# to the gh-pages branch with plain git, which GitHub Pages serves.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: build the site
+        run: go run ./tools/build -out "$RUNNER_TEMP/site"
+      - name: publish to gh-pages
+        env:
+          SITE: ${{ runner.temp }}/site
+          SHA: ${{ github.sha }}
+        run: |
+          cd "$SITE"
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "site for $SHA"
+          git push -q --force "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" gh-pages

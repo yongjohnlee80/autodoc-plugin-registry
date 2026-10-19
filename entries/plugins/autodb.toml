@@ -1,0 +1,6 @@
+kind = "plugin"
+name = "autodb"
+title = "AutoDB"
+description = "SQL workspaces and connections in a card beside the page: run a statement, a selection or a script, with results in AutoDoc's table panel."
+repo = "https://github.com/yongjohnlee80/autodb"
+author = "yongjohnlee80"

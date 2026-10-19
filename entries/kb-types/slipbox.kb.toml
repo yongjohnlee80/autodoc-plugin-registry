@@ -1,0 +1,6 @@
+kind = "kb-type"
+name = "slipbox.kb"
+title = "Slip-box"
+description = "Ahrens's slip-box: one flat box of ID-named permanent notes ordered only by links, with references and project drafts beside it."
+repo = "https://github.com/yongjohnlee80/slipbox.kb"
+author = "yongjohnlee80"

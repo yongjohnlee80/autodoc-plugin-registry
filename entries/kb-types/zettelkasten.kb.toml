@@ -1,0 +1,6 @@
+kind = "kb-type"
+name = "zettelkasten.kb"
+title = "Zettelkasten"
+description = "Luhmann's method: fleeting, literature and permanent notes, joined by links and structure notes."
+repo = "https://github.com/yongjohnlee80/zettelkasten.kb"
+author = "yongjohnlee80"

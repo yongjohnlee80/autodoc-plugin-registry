@@ -1,0 +1,6 @@
+kind = "plugin"
+name = "tetris"
+title = "AutoTetris"
+description = "Tetris as a dialog over the page, drawn through AutoDoc's plugin SDK, by the guideline: a 7-bag and Super Rotation System kicks."
+repo = "https://github.com/yongjohnlee80/autodoc-tetris"
+author = "yongjohnlee80"

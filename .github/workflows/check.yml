@@ -1,0 +1,22 @@
+name: check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: vet and test the tools
+        run: go vet ./... && go test -race -count=1 ./...
+      - name: check every entry, its audits and its repo at each audited commit
+        run: go run ./tools/check
