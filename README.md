@@ -27,6 +27,7 @@ audits/<kind>/<name>/<full commit>.md   an audit's report
 registry/                  the entries' schema, checks, and the index build (Go)
 tools/check                validates every entry: CI runs it on each pull request
 tools/build                writes the site: index.json, the pages and the reports
+tools/audit                the weekly audit: proposes [[audit]]s and their reports as a pull request
 ```
 
 An entry:
@@ -58,6 +59,18 @@ the newest audited commit (or HEAD when none is), with AutoDoc's own readers (`c
    audited commit exists and is a commit, and that the manifest parses at HEAD and at each audited
    commit, naming the entry. Nothing from the repo is built or run.
 3. Open a pull request. CI runs the same check; merging publishes the site.
+
+## The weekly audit
+
+```sh
+go run ./tools/audit -model <model> [-by johno] [-no-pr] [kind/name …]
+```
+
+For each entry whose HEAD has no audit yet, it checks the repo out at HEAD with nothing in it run,
+has `claude -p` read it with only its reading tools and AutoDoc's own audit prompt
+(`docs/audit-prompt.md`, at the version `go.mod` pins), and writes the report and an `[[audit]]`.
+A run that fails or says nothing writes neither. It then opens one pull request with them all. It
+never merges: read each report, and merging marks its commit audited.
 
 ## License
 
