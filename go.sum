@@ -1,8 +1,8 @@
 github.com/BurntSushi/toml v1.6.0 h1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=
 github.com/BurntSushi/toml v1.6.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
-github.com/yongjohnlee80/autodoc v0.1.59-0.20261019031804-a744a0667ee4 h1:otGJ9MC651GXzbKemLr8AnXsOkwRql3fSgmr4qTBffU=
-github.com/yongjohnlee80/autodoc v0.1.59-0.20261019031804-a744a0667ee4/go.mod h1:gAbfJ7zVaImxDTW18qH5uVxCtJh8B2GK9kOuVi3VuZQ=
-github.com/yongjohnlee80/golib v0.7.11 h1:6yK3y4+Gb25mW6K48sbbsoxT8Ct1EN5BSpMIgenCqLo=
-github.com/yongjohnlee80/golib v0.7.11/go.mod h1:51NFYIWtdUMoHn3EPuF/1ayODet0MjsetfaAaNZ0F40=
+github.com/yongjohnlee80/autodoc v0.1.60-0.20261019071434-fa3bfa6226d3 h1:XXxyqtLIWnG2tDWKg35HvYE0y+W9o61lv912F0Rpeo0=
+github.com/yongjohnlee80/autodoc v0.1.60-0.20261019071434-fa3bfa6226d3/go.mod h1:QoVvalnshLYZNpzbkvjh1kyiralYIQTbAps/M/Dv/f8=
+github.com/yongjohnlee80/golib v0.7.13 h1:t095U3m/t1sY90UsVH5PoyTc0RSuWv/59eXcXnMjliE=
+github.com/yongjohnlee80/golib v0.7.13/go.mod h1:51NFYIWtdUMoHn3EPuF/1ayODet0MjsetfaAaNZ0F40=
 golang.org/x/text v0.41.0 h1:vz/seA0lnX87Othu2f/0L24RcgrXD9/YFTSuGjj3rH8=
 golang.org/x/text v0.41.0/go.mod h1:jvf1O8ajNzZqhSrQBPbutR/EB83Cc0CFrezNQIwbb5M=
