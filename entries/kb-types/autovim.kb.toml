@@ -1,0 +1,6 @@
+kind = "kb-type"
+name = "autovim.kb"
+title = "AutoVim coding KB"
+description = "A coding project's KB: ADRs, conventions, playbooks, reviews, PR records and synthesis, beside the code."
+repo = "https://github.com/yongjohnlee80/autovim.kb"
+author = "yongjohnlee80"
