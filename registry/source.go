@@ -38,7 +38,10 @@ func (Git) Checkout(ctx context.Context, repo, rev, dir string) (string, string,
 			"-c", "protocol.https.allow=always",
 		}, args...)...)
 		cmd.Dir = tree
-		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0", "GIT_TEMPLATE_DIR=")
+		// no inherited configuration at all: a user's or the system's insteadOf could rewrite the
+		// URL, and a credential helper could answer for it
+		cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0", "GIT_TEMPLATE_DIR=",
+			"GIT_CONFIG_GLOBAL=/dev/null", "GIT_CONFIG_NOSYSTEM=1")
 		var out, stderr bytes.Buffer
 		cmd.Stdout, cmd.Stderr = &out, &stderr
 		if err := cmd.Run(); err != nil {
