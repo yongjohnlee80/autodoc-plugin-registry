@@ -24,6 +24,7 @@ import (
 
 	"github.com/yongjohnlee80/autodoc"
 	"github.com/yongjohnlee80/autodoc-plugin-registry/registry"
+	regindex "github.com/yongjohnlee80/autodoc/core/registry"
 )
 
 func main() {
@@ -157,7 +158,7 @@ func (a auditor) one(ctx context.Context, e registry.Entry) (string, error) {
 		return "", errors.New("the agent wrote nothing")
 	}
 	date := a.now().UTC().Format(time.DateOnly)
-	report := registry.ReportPath(e.Kind, e.Name, commit)
+	report := regindex.ReportPath(e.Kind, e.Name, commit)
 	head := fmt.Sprintf("# Audit of %s %s at %s\n\n- Repo: %s\n- Commit: %s\n- Model: %s\n- Tool: %s\n- Exit status: %d\n- Date: %s\n- By: %s\n\n",
 		e.Kind, e.Name, commit[:7], e.Repo, commit, a.model, tool, status, date, a.by)
 	if err := os.MkdirAll(filepath.Join(a.root, filepath.Dir(report)), 0o755); err != nil {

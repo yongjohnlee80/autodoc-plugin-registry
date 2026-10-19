@@ -52,6 +52,10 @@ An entry never lists what its code does: `tools/build` reads it from the repo's 
 the newest audited commit (or HEAD when none is), with AutoDoc's own readers (`core/manifests`,
 `core/kbtype`), so the registry and AutoDoc never disagree on what a manifest means.
 
+`index.json`'s format and its rules (full commits, the allowed hosts, the reports' URLs) are AutoDoc's
+too: `core/registry`, which AutoDoc's client decodes the index with. `tools/build` writes no site
+for an index that check would refuse.
+
 ## Adding an entry
 
 1. Add `entries/<kind dir>/<name>.toml`, named for the manifest's `name`.

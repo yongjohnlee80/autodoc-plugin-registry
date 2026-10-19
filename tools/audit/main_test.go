@@ -13,6 +13,7 @@ import (
 
 	"github.com/yongjohnlee80/autodoc"
 	"github.com/yongjohnlee80/autodoc-plugin-registry/registry"
+	regindex "github.com/yongjohnlee80/autodoc/core/registry"
 )
 
 const head = "3333333333333333333333333333333333333333"
@@ -80,7 +81,7 @@ func TestAnUnauditedHeadIsAuditedAndRecorded(t *testing.T) {
 	if !strings.HasPrefix(asked, autodoc.AuditPrompt) || !strings.Contains(asked, "The copy: "+tree) || !strings.Contains(asked, "The commit: "+head) {
 		t.Fatalf("the task:\n%s", asked)
 	}
-	report, err := os.ReadFile(filepath.Join(root, registry.ReportPath("plugin", "autodb", head)))
+	report, err := os.ReadFile(filepath.Join(root, regindex.ReportPath("plugin", "autodb", head)))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,8 +102,8 @@ func TestAnUnauditedHeadIsAuditedAndRecorded(t *testing.T) {
 
 // A HEAD already audited runs no agent and writes nothing.
 func TestAnAuditedHeadIsLeftAlone(t *testing.T) {
-	audit := fmt.Sprintf("\n[[audit]]\ncommit = %q\nmodel = \"m\"\ndate = 2026-10-01\nby = \"johno\"\nreport = %q\n", head, registry.ReportPath("plugin", "autodb", head))
-	root := registryAt(t, audit, map[string]string{registry.ReportPath("plugin", "autodb", head): "r"})
+	audit := fmt.Sprintf("\n[[audit]]\ncommit = %q\nmodel = \"m\"\ndate = 2026-10-01\nby = \"johno\"\nreport = %q\n", head, regindex.ReportPath("plugin", "autodb", head))
+	root := registryAt(t, audit, map[string]string{regindex.ReportPath("plugin", "autodb", head): "r"})
 	a, log := newAuditor(root, func(context.Context, string, string, string) ([]byte, int, string, error) {
 		t.Error("the agent ran")
 		return nil, 0, "", nil
@@ -118,7 +119,7 @@ func TestAnAuditedHeadIsLeftAlone(t *testing.T) {
 // A failed, silent or unstarted agent, or a refused fetch, writes no report and leaves the entry
 // as it was; an older audit doesn't count for HEAD.
 func TestAFailedAuditWritesNothing(t *testing.T) {
-	older := fmt.Sprintf("\n[[audit]]\ncommit = %q\nmodel = \"m\"\ndate = 2026-10-01\nby = \"johno\"\nreport = %q\n", old, registry.ReportPath("plugin", "autodb", old))
+	older := fmt.Sprintf("\n[[audit]]\ncommit = %q\nmodel = \"m\"\ndate = 2026-10-01\nby = \"johno\"\nreport = %q\n", old, regindex.ReportPath("plugin", "autodb", old))
 	for _, c := range []struct {
 		name  string
 		agent agentFunc
@@ -136,13 +137,13 @@ func TestAFailedAuditWritesNothing(t *testing.T) {
 		}, headSource{}, "did not run"},
 		{"refused", nil, headSource{refuse: true}, "could not verify"},
 	} {
-		root := registryAt(t, older, map[string]string{registry.ReportPath("plugin", "autodb", old): "r"})
+		root := registryAt(t, older, map[string]string{regindex.ReportPath("plugin", "autodb", old): "r"})
 		a, log := newAuditor(root, c.agent, c.src, t)
 		done, err := a.all(context.Background(), nil)
 		if err != nil || len(done) != 0 || !strings.Contains(log.String(), c.want) {
 			t.Errorf("%s: done %v, %v, log %q", c.name, done, err, log)
 		}
-		if _, err := os.Stat(filepath.Join(root, registry.ReportPath("plugin", "autodb", head))); err == nil {
+		if _, err := os.Stat(filepath.Join(root, regindex.ReportPath("plugin", "autodb", head))); err == nil {
 			t.Errorf("%s: a report was written", c.name)
 		}
 		if got, _ := os.ReadFile(filepath.Join(root, "entries/plugins/autodb.toml")); string(got) != entry+older {

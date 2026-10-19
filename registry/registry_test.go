@@ -11,6 +11,8 @@ import (
 	"testing"
 	"testing/fstest"
 	"time"
+
+	regindex "github.com/yongjohnlee80/autodoc/core/registry"
 )
 
 const sha1 = "1111111111111111111111111111111111111111"
@@ -37,7 +39,7 @@ func TestLoadRefusesUnknownKeysAndMisfiledEntries(t *testing.T) {
 		t.Fatalf("misfiled: %v", err)
 	}
 	es, err := Load(entryFS(map[string]string{"entries/plugins/autodb.toml": plugin, "entries/kb-types/para.kb.toml": strings.NewReplacer(`"plugin"`, `"kb-type"`, `"autodb"`, `"para.kb"`).Replace(plugin)}))
-	if err != nil || len(es) != 2 || es[0].Kind != KindKBType || es[1].Name != "autodb" {
+	if err != nil || len(es) != 2 || es[0].Kind != regindex.KindKBType || es[1].Name != "autodb" {
 		t.Fatalf("%v, %+v; want both, kb-type first", err, es)
 	}
 }
@@ -47,7 +49,7 @@ func TestValidateRefusesEachRule(t *testing.T) {
 	audit := func(commit, report string) string {
 		return fmt.Sprintf("[[audit]]\ncommit = %q\nmodel = \"m\"\ndate = 2026-10-19\nby = \"johno\"\nreport = %q\n", commit, report)
 	}
-	good := ReportPath(KindPlugin, "autodb", sha1)
+	good := regindex.ReportPath(regindex.KindPlugin, "autodb", sha1)
 	for _, c := range []struct{ name, entry, file, want string }{
 		{"the file named for another", plugin, "entries/plugins/other.toml", `the file is named for "other.toml", but the entry is "autodb"`},
 		{"no title", strings.Replace(plugin, `title = "AutoDB"`, `title = " "`, 1), "", "no title"},
@@ -56,7 +58,7 @@ func TestValidateRefusesEachRule(t *testing.T) {
 		{"a deep path", strings.Replace(plugin, "o/autodb", "o/autodb/tree/main", 1), "", "want https://<host>/<owner>/<repo>"},
 		{"a short commit", plugin + audit("1111111", good), "", "want the full 40-character SHA"},
 		{"a report elsewhere", plugin + audit(sha1, "audits/autodb.md"), "", "want \"" + good + "\""},
-		{"a missing report", plugin + audit(sha2, ReportPath(KindPlugin, "autodb", sha2)), "", "is missing"},
+		{"a missing report", plugin + audit(sha2, regindex.ReportPath(regindex.KindPlugin, "autodb", sha2)), "", "is missing"},
 		{"twice", plugin + audit(sha1, good) + audit(sha1, good), "", "audited twice"},
 	} {
 		file := c.file
@@ -123,7 +125,7 @@ const pluginToml = "name = \"autodb\"\nkind = \"service\"\nprotocol = 4\ncommand
 // declarations are the index's; a refused fetch is ErrUnverified; a manifest naming another
 // plugin is refused.
 func TestVerify(t *testing.T) {
-	e := Entry{Kind: KindPlugin, Name: "autodb", Repo: "https://github.com/o/autodb", File: "entries/plugins/autodb.toml",
+	e := Entry{Kind: regindex.KindPlugin, Name: "autodb", Repo: "https://github.com/o/autodb", File: "entries/plugins/autodb.toml",
 		Audits: []Audit{{Commit: sha1, Date: time.Date(2026, 10, 1, 0, 0, 0, 0, time.UTC)}, {Commit: sha2, Date: time.Date(2026, 10, 19, 0, 0, 0, 0, time.UTC)}}}
 	lua := "name = \"autodb\"\nrequires = [\"clipboard\"]\n"
 	src := fakeSource{head: "3333333333333333333333333333333333333333", trees: map[string]map[string]string{
@@ -155,23 +157,23 @@ func TestVerify(t *testing.T) {
 
 // The same entries at the same commits give the same bytes, and the site carries the reports.
 func TestTheBuildIsDeterministic(t *testing.T) {
-	es := []Entry{{Kind: KindPlugin, Name: "autodb", Title: "AutoDB", Description: "d", Repo: "https://github.com/o/autodb", Author: "o",
-		Audits: []Audit{{Commit: sha1, Model: "m", By: "johno", Date: time.Date(2026, 10, 19, 0, 0, 0, 0, time.UTC), Report: ReportPath(KindPlugin, "autodb", sha1)}}}}
-	d := map[string]Declares{"plugin/autodb": {Commit: sha1, Items: []string{"a card beside the page"}}}
+	es := []Entry{{Kind: regindex.KindPlugin, Name: "autodb", Title: "AutoDB", Description: "d", Repo: "https://github.com/o/autodb", Author: "o",
+		Audits: []Audit{{Commit: sha1, Model: "m", By: "johno", Date: time.Date(2026, 10, 19, 0, 0, 0, 0, time.UTC), Report: regindex.ReportPath(regindex.KindPlugin, "autodb", sha1)}}}}
+	d := map[string]regindex.Declares{"plugin/autodb": {Commit: sha1, Items: []string{"a card beside the page"}}}
 	when := time.Date(2026, 10, 19, 12, 0, 0, 0, time.UTC)
-	a, err := BuildIndex(es, d, when).JSON()
+	a, err := IndexJSON(BuildIndex(es, d, when))
 	if err != nil {
 		t.Fatal(err)
 	}
-	b, _ := BuildIndex(es, d, when).JSON()
+	b, _ := IndexJSON(BuildIndex(es, d, when))
 	if !bytes.Equal(a, b) {
 		t.Fatal("two builds differ")
 	}
-	if !bytes.Contains(a, []byte(`"report": "`+PagesURL+"audits/plugin/autodb/"+sha1+`.md"`)) || !bytes.Contains(a, []byte(`"format": 1`)) {
+	if !bytes.Contains(a, []byte(`"report": "`+regindex.PagesURL+"audits/plugin/autodb/"+sha1+`.md"`)) || !bytes.Contains(a, []byte(`"format": 1`)) {
 		t.Fatalf("index:\n%s", a)
 	}
 	out := t.TempDir()
-	root := entryFS(map[string]string{ReportPath(KindPlugin, "autodb", sha1): "the report"})
+	root := entryFS(map[string]string{regindex.ReportPath(regindex.KindPlugin, "autodb", sha1): "the report"})
 	if err := WriteSite(out, root, BuildIndex(es, d, when)); err != nil {
 		t.Fatal(err)
 	}
@@ -179,5 +181,20 @@ func TestTheBuildIsDeterministic(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(out, p)); err != nil {
 			t.Errorf("site lacks %s", p)
 		}
+	}
+}
+
+// The site is never written for an index AutoDoc would refuse: WriteSite runs the client's own
+// check (core/registry's Validate) first.
+func TestTheSiteRefusesAnIndexAutoDocWouldRefuse(t *testing.T) {
+	es := []Entry{{Kind: regindex.KindPlugin, Name: "autodb", Title: "AutoDB", Description: "d", Repo: "https://github.com/o/autodb", Author: "o",
+		Audits: []Audit{{Commit: sha1[:7], Model: "m", By: "johno", Date: time.Date(2026, 10, 19, 0, 0, 0, 0, time.UTC), Report: regindex.ReportPath(regindex.KindPlugin, "autodb", sha1[:7])}}}}
+	out := t.TempDir()
+	err := WriteSite(out, entryFS(nil), BuildIndex(es, nil, time.Date(2026, 10, 19, 12, 0, 0, 0, time.UTC)))
+	if err == nil || !strings.Contains(err.Error(), "full 40-character SHA") {
+		t.Fatalf("a short audit commit: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(out, "index.json")); err == nil {
+		t.Fatal("index.json was written for a refused index")
 	}
 }
