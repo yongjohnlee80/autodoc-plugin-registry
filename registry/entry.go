@@ -13,25 +13,18 @@ import (
 	"fmt"
 	"io/fs"
 	"path"
-	"regexp"
 	"slices"
 	"strings"
 	"time"
 
 	"github.com/BurntSushi/toml"
+
+	regindex "github.com/yongjohnlee80/autodoc/core/registry"
 )
 
-// The kinds an entry may be, and the directory under entries/ each lives in.
-const (
-	KindPlugin = "plugin"
-	KindLua    = "lua"
-	KindKBType = "kb-type"
-)
-
-var kindDirs = map[string]string{KindPlugin: "plugins", KindLua: "lua", KindKBType: "kb-types"}
-
-// Hosts are where an entry's repo may live.
-var Hosts = []string{"github.com", "gitlab.com", "codeberg.org"}
+// The kinds an entry may be are AutoDoc's (core/registry owns the index format and its rules); this
+// is the directory under entries/ each lives in.
+var kindDirs = map[string]string{regindex.KindPlugin: "plugins", regindex.KindLua: "lua", regindex.KindKBType: "kb-types"}
 
 // Entry is one entries/<kind dir>/<name>.toml.
 type Entry struct {
@@ -55,13 +48,6 @@ type Audit struct {
 	Date   time.Time `toml:"date"`
 	By     string    `toml:"by"`
 	Report string    `toml:"report"`
-}
-
-var fullSHA = regexp.MustCompile(`^[0-9a-f]{40}$`)
-
-// ReportPath is where the report of an audit of e at commit lives.
-func ReportPath(kind, name, commit string) string {
-	return path.Join("audits", kind, name, commit+".md")
 }
 
 // Load reads every entry under entries/ of fsys, the registry's root. A file that does not parse,
@@ -135,13 +121,13 @@ func Validate(fsys fs.FS, entries []Entry) error {
 				bad("no %s", field)
 			}
 		}
-		if err := checkRepo(e.Repo); err != nil {
+		if err := regindex.CheckRepo(e.Repo); err != nil {
 			bad("repo %q: %v", e.Repo, err)
 		}
 		commits := map[string]bool{}
 		for i, a := range e.Audits {
 			switch {
-			case !fullSHA.MatchString(a.Commit):
+			case !regindex.IsFullSHA(a.Commit):
 				bad("audit %d: commit %q: want the full 40-character SHA (a tag can move; a commit can't)", i+1, a.Commit)
 				continue
 			case commits[a.Commit]:
@@ -152,7 +138,7 @@ func Validate(fsys fs.FS, entries []Entry) error {
 				bad("audit %d: no date", i+1)
 			}
 			commits[a.Commit] = true
-			if want := ReportPath(e.Kind, e.Name, a.Commit); a.Report != want {
+			if want := regindex.ReportPath(e.Kind, e.Name, a.Commit); a.Report != want {
 				bad("audit %d: report %q: want %q", i+1, a.Report, want)
 			} else if _, err := fs.Stat(fsys, want); err != nil {
 				bad("audit %d: report %s is missing", i+1, want)
@@ -160,21 +146,4 @@ func Validate(fsys fs.FS, entries []Entry) error {
 		}
 	}
 	return errors.Join(errs...)
-}
-
-// checkRepo is why a repo URL is refused: https only, on one of Hosts, owner and repo, nothing else.
-func checkRepo(repo string) error {
-	rest, ok := strings.CutPrefix(repo, "https://")
-	if !ok {
-		return errors.New("want an https:// URL")
-	}
-	host, p, _ := strings.Cut(rest, "/")
-	if !slices.Contains(Hosts, host) {
-		return fmt.Errorf("host %q: want one of %s", host, strings.Join(Hosts, ", "))
-	}
-	parts := strings.Split(strings.TrimSuffix(p, ".git"), "/")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" || strings.ContainsAny(p, "?#@ ") {
-		return errors.New("want https://<host>/<owner>/<repo>")
-	}
-	return nil
 }

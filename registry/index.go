@@ -9,65 +9,32 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	regindex "github.com/yongjohnlee80/autodoc/core/registry"
 )
-
-// Format is the index's format version: AutoDoc refuses an index of a format it does not know.
-const Format = 1
-
-// PagesURL is where the built site is served from.
-const PagesURL = "https://yongjohnlee80.github.io/autodoc-plugin-registry/"
-
-// Index is index.json.
-type Index struct {
-	Format    int          `json:"format"`
-	Generated string       `json:"generated"`
-	Entries   []IndexEntry `json:"entries"`
-}
-
-// IndexEntry is an entry as the index lists it: what the entry says, what its manifest declares at
-// a named commit, and its audits, each with its report's URL.
-type IndexEntry struct {
-	Kind        string       `json:"kind"`
-	Name        string       `json:"name"`
-	Title       string       `json:"title"`
-	Description string       `json:"description"`
-	Repo        string       `json:"repo"`
-	Author      string       `json:"author"`
-	Declares    Declares     `json:"declares"`
-	Audits      []IndexAudit `json:"audits"`
-}
-
-// IndexAudit is an audit as the index lists it.
-type IndexAudit struct {
-	Commit string `json:"commit"`
-	Model  string `json:"model"`
-	Date   string `json:"date"`
-	By     string `json:"by"`
-	Report string `json:"report"`
-}
 
 // BuildIndex is the index of entries, in their order, with each one's declarations. generated is
 // when: the registry's own commit time, never the clock, so the same entries give the same bytes.
-func BuildIndex(entries []Entry, declares map[string]Declares, generated time.Time) Index {
-	ix := Index{Format: Format, Generated: generated.UTC().Format(time.RFC3339), Entries: []IndexEntry{}}
+func BuildIndex(entries []Entry, declares map[string]regindex.Declares, generated time.Time) regindex.Index {
+	ix := regindex.Index{Format: regindex.Format, Generated: generated.UTC().Format(time.RFC3339), Entries: []regindex.IndexEntry{}}
 	for _, e := range entries {
 		d := declares[e.Kind+"/"+e.Name]
 		if d.Items == nil {
 			d.Items = []string{}
 		}
-		ie := IndexEntry{Kind: e.Kind, Name: e.Name, Title: e.Title, Description: e.Description,
-			Repo: e.Repo, Author: e.Author, Declares: d, Audits: []IndexAudit{}}
+		ie := regindex.IndexEntry{Kind: e.Kind, Name: e.Name, Title: e.Title, Description: e.Description,
+			Repo: e.Repo, Author: e.Author, Declares: d, Audits: []regindex.IndexAudit{}}
 		for _, a := range newestFirst(e.Audits) {
-			ie.Audits = append(ie.Audits, IndexAudit{Commit: a.Commit, Model: a.Model,
-				Date: a.Date.UTC().Format(time.DateOnly), By: a.By, Report: PagesURL + a.Report})
+			ie.Audits = append(ie.Audits, regindex.IndexAudit{Commit: a.Commit, Model: a.Model,
+				Date: a.Date.UTC().Format(time.DateOnly), By: a.By, Report: regindex.PagesURL + a.Report})
 		}
 		ix.Entries = append(ix.Entries, ie)
 	}
 	return ix
 }
 
-// JSON is the index's bytes: indented, with a final newline.
-func (ix Index) JSON() ([]byte, error) {
+// IndexJSON is the index's bytes: indented, with a final newline.
+func IndexJSON(ix regindex.Index) ([]byte, error) {
 	b, err := json.MarshalIndent(ix, "", "  ")
 	if err != nil {
 		return nil, err
@@ -76,9 +43,13 @@ func (ix Index) JSON() ([]byte, error) {
 }
 
 // WriteSite writes the site into out: index.json, a page listing every entry, one page per entry,
-// and the audit reports, copied from root (the registry's root), at the paths the index names.
-func WriteSite(out string, root fs.FS, ix Index) error {
-	b, err := ix.JSON()
+// and the audit reports, copied from root (the registry's root), at the paths the index names. An
+// index AutoDoc would refuse (regindex.Validate, the client's own check) is never written.
+func WriteSite(out string, root fs.FS, ix regindex.Index) error {
+	if err := regindex.Validate(ix); err != nil {
+		return err
+	}
+	b, err := IndexJSON(ix)
 	if err != nil {
 		return err
 	}
@@ -101,7 +72,7 @@ func WriteSite(out string, root fs.FS, ix Index) error {
 			return err
 		}
 		for _, a := range e.Audits {
-			rel := ReportPath(e.Kind, e.Name, a.Commit)
+			rel := regindex.ReportPath(e.Kind, e.Name, a.Commit)
 			src, err := fs.ReadFile(root, rel)
 			if err != nil {
 				return fmt.Errorf("%s: %w", rel, err)

@@ -10,20 +10,15 @@ import (
 
 	"github.com/yongjohnlee80/autodoc/core/kbtype"
 	"github.com/yongjohnlee80/autodoc/core/manifests"
+	regindex "github.com/yongjohnlee80/autodoc/core/registry"
 )
-
-// Declares is what an entry's manifest says it does, read at Commit.
-type Declares struct {
-	Commit string   `json:"commit"`
-	Items  []string `json:"items"`
-}
 
 // Read reads the manifest of e's kind in tree, a checkout of its repo, through AutoDoc's own readers,
 // and says what it declares. The manifest must parse, be valid, and name the entry.
 func Read(e Entry, tree string) ([]string, error) {
 	fsys := os.DirFS(tree)
 	switch e.Kind {
-	case KindPlugin:
+	case regindex.KindPlugin:
 		m, err := manifests.ReadPlugin(fsys)
 		if err != nil {
 			return nil, err
@@ -44,13 +39,13 @@ func Read(e Entry, tree string) ([]string, error) {
 			items = append(items, luaItem(p))
 		}
 		return items, nil
-	case KindLua:
+	case regindex.KindLua:
 		p, err := manifests.ReadPackage(fsys, e.Name)
 		if err != nil {
 			return nil, err
 		}
 		return []string{luaItem(p)}, nil
-	case KindKBType:
+	case regindex.KindKBType:
 		t, err := kbtype.Read(tree)
 		if err != nil {
 			return nil, err
@@ -79,22 +74,22 @@ func luaItem(p manifests.Package) string {
 // manifest parses there and at HEAD, naming the entry. A refused fetch is ErrUnverified, reported as
 // such, never as a false audit. It returns each entry's declarations, read at its newest audited
 // commit, or at HEAD when none is audited.
-func Verify(ctx context.Context, src Source, entries []Entry, scratch string) (map[string]Declares, error) {
-	out := map[string]Declares{}
+func Verify(ctx context.Context, src Source, entries []Entry, scratch string) (map[string]regindex.Declares, error) {
+	out := map[string]regindex.Declares{}
 	var errs []error
 	for _, e := range entries {
 		key := e.Kind + "/" + e.Name
-		read := func(rev string) (Declares, error) {
+		read := func(rev string) (regindex.Declares, error) {
 			tree, commit, err := src.Checkout(ctx, e.Repo, rev, scratch)
 			if err != nil {
-				return Declares{}, err
+				return regindex.Declares{}, err
 			}
 			defer os.RemoveAll(tree)
 			items, err := Read(e, tree)
 			if err != nil {
-				return Declares{}, fmt.Errorf("at %s: %w", commit, err)
+				return regindex.Declares{}, fmt.Errorf("at %s: %w", commit, err)
 			}
-			return Declares{Commit: commit, Items: items}, nil
+			return regindex.Declares{Commit: commit, Items: items}, nil
 		}
 		head, err := read("HEAD")
 		if err != nil {

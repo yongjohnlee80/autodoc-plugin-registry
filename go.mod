@@ -4,7 +4,7 @@ go 1.26.9
 
 require (
 	github.com/BurntSushi/toml v1.6.0
-	github.com/yongjohnlee80/autodoc v0.1.60-0.20261019071434-fa3bfa6226d3
+	github.com/yongjohnlee80/autodoc v0.1.60-0.20261019074700-1906edd164b9
 )
 
 require (
