@@ -1,0 +1,146 @@
+{
+  "format": 1,
+  "generated": "2026-10-20T07:50:35Z",
+  "entries": [
+    {
+      "kind": "kb-type",
+      "name": "autovim.kb",
+      "title": "AutoVim coding KB",
+      "description": "A coding project's KB: ADRs, conventions, playbooks, reviews, PR records and synthesis, beside the code.",
+      "repo": "https://github.com/yongjohnlee80/autovim.kb",
+      "author": "yongjohnlee80",
+      "declares": {
+        "commit": "4d5a0e8bc54f356fcd52175ff20b5fcf89592619",
+        "items": [
+          "folder: raw",
+          "folder: adrs",
+          "folder: conventions",
+          "folder: playbooks",
+          "folder: reference",
+          "folder: synthesis",
+          "folder: reviews",
+          "folder: prs",
+          "folder: notes",
+          "folder: scripts",
+          "folder: archive",
+          "folder: _templates",
+          "folder: _schema"
+        ]
+      },
+      "audits": []
+    },
+    {
+      "kind": "kb-type",
+      "name": "para.kb",
+      "title": "PARA",
+      "description": "Tiago Forte's PARA: Projects, Areas, Resources and Archives, filed by how actionable they are.",
+      "repo": "https://github.com/yongjohnlee80/para.kb",
+      "author": "yongjohnlee80",
+      "declares": {
+        "commit": "f98502843d501d4a1cc8e9fcc9518ea7e6c7f8bd",
+        "items": [
+          "folder: projects",
+          "folder: areas",
+          "folder: resources",
+          "folder: archives",
+          "folder: _templates",
+          "folder: _schema"
+        ]
+      },
+      "audits": []
+    },
+    {
+      "kind": "kb-type",
+      "name": "slipbox.kb",
+      "title": "Slip-box",
+      "description": "Ahrens's slip-box: one flat box of ID-named permanent notes ordered only by links, with references and project drafts beside it.",
+      "repo": "https://github.com/yongjohnlee80/slipbox.kb",
+      "author": "yongjohnlee80",
+      "declares": {
+        "commit": "5032a758af2619eaec187c10b974482d5aaa0a10",
+        "items": [
+          "folder: inbox",
+          "folder: slipbox",
+          "folder: references",
+          "folder: projects",
+          "folder: _templates",
+          "folder: _schema"
+        ]
+      },
+      "audits": []
+    },
+    {
+      "kind": "kb-type",
+      "name": "zettelkasten.kb",
+      "title": "Zettelkasten",
+      "description": "Luhmann's method: fleeting, literature and permanent notes, joined by links and structure notes.",
+      "repo": "https://github.com/yongjohnlee80/zettelkasten.kb",
+      "author": "yongjohnlee80",
+      "declares": {
+        "commit": "594e10248c3b43a9c9f23376c05b8eed50fdf7f9",
+        "items": [
+          "folder: fleeting",
+          "folder: literature",
+          "folder: permanent",
+          "folder: structure",
+          "folder: _templates",
+          "folder: _schema"
+        ]
+      },
+      "audits": []
+    },
+    {
+      "kind": "plugin",
+      "name": "autodb",
+      "title": "AutoDB",
+      "description": "SQL workspaces and connections in a card beside the page: run a statement, a selection or a script, with results in AutoDoc's table panel.",
+      "repo": "https://github.com/yongjohnlee80/autodb",
+      "author": "yongjohnlee80",
+      "declares": {
+        "commit": "1d71cfc20a0bb15c628aa2e54d00f21e0844f1c5",
+        "items": [
+          "a card beside the page",
+          "reads the open note's text (feed)",
+          "commands: Show or hide the AutoDB card (o on its SPC p card), Run statement or selection (r on its SPC p card), Run a query (:autodb query \u003csql\u003e), Save the remote note to its server, Run whole script (s on its SPC p card), Connection… (c on its SPC p card), Cancel query (x on its SPC p card)",
+          "may run AutoDoc's commands: buffer.new, file.open_path, file.save, plugins.update",
+          "shows a table of results (Results)",
+          "a Lua package, asking for nothing"
+        ]
+      },
+      "audits": []
+    },
+    {
+      "kind": "plugin",
+      "name": "jupyter",
+      "title": "Jupyter",
+      "description": "Run a lab note's cells (*.lab.md) in a Jupyter kernel, keep their outputs beside the note for AutoDoc to draw, and open an .ipynb as a lab note.",
+      "repo": "https://github.com/yongjohnlee80/autodoc-jupyter",
+      "author": "yongjohnlee80",
+      "declares": {
+        "commit": "0a30b585b4d375945ade8f3c50b9a0f0bf61e0a1",
+        "items": [
+          "a card beside the page",
+          "reads the open note's text (feed)",
+          "commands: Run cell or selection (r on its SPC p card), Run all cells (a on its SPC p card), Interrupt kernel (x on its SPC p card), Restart kernel (s on its SPC p card), Choose kernel… (k on its SPC p card), Open an .ipynb as a lab note, Export to .ipynb (e on its SPC p card)",
+          "may run AutoDoc's commands: file.open_path, view.redraw",
+          "shows a table of results (DataFrame)",
+          "opens .ipynb files"
+        ]
+      },
+      "audits": []
+    },
+    {
+      "kind": "plugin",
+      "name": "tetris",
+      "title": "AutoTetris",
+      "description": "Tetris as a dialog over the page, drawn through AutoDoc's plugin SDK, by the guideline: a 7-bag and Super Rotation System kicks.",
+      "repo": "https://github.com/yongjohnlee80/autodoc-tetris",
+      "author": "yongjohnlee80",
+      "declares": {
+        "commit": "bd5893ee1c7c1955cc5837514a05b70c3d905ab4",
+        "items": []
+      },
+      "audits": []
+    }
+  ]
+}
