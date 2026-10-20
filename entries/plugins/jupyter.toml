@@ -1,0 +1,6 @@
+kind = "plugin"
+name = "jupyter"
+title = "Jupyter"
+description = "Run a lab note's cells (*.lab.md) in a Jupyter kernel, keep their outputs beside the note for AutoDoc to draw, and open an .ipynb as a lab note."
+repo = "https://github.com/yongjohnlee80/autodoc-jupyter"
+author = "yongjohnlee80"
